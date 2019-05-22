@@ -75,7 +75,7 @@ void loop()
     Serial.print(pitch-506);Serial.print("    ");
     Serial.print(roll-510);Serial.print("    ");
     Serial.println(1-button_right);
-    delay(50);
+    delay(5);
     
     // First, stop listening so we can talk.
     radio.stopListening();
@@ -91,26 +91,5 @@ void loop()
 
     // Now, continue listening
     radio.startListening();
-
-    // Wait here until we get a response, or timeout (250ms)
-    unsigned long started_waiting_at = millis();
-    bool timeout = false;
-    while ( ! radio.available() && ! timeout )
-      if (millis() - started_waiting_at > 200 )
-        timeout = true;
-
-    // Describe the results
-    if ( timeout )
-    {
-      Serial.println("Failed, response timed out.\n\r");
-    }
-    else
-    {
-      // Grab the response, compare, and send to debugging spew
-      tx_packet tp2;
-      radio.read( &tp2, sizeof(tp2) );
-    }
-
-    // Try again 1s later
     delay(10);
 }

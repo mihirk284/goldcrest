@@ -78,18 +78,10 @@ void loop()
 
       // First, stop listening so we can talk
       radio.stopListening();
-
-      // Send the final one back.
-      radio.write( &tp1, sizeof(tp1) );
-      Serial.println("Sent response.\n\r");
-
+      delay(5);
       // Now, resume listening so we catch the next packets.
       radio.startListening();
       count++;
     }
     delay(5);
-    Serial.println();
-    Serial.println(millis());
-    Serial.println(count);
-    Serial.println();
 }
