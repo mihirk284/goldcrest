@@ -66,7 +66,7 @@ void dmpDataReady() {
 // ===               MOTION VARIABLES                           ===
 // ================================================================
 short iYaw[101], iPitch[101], iRoll[101];
-int motor1=0, motor2=0, motor3=0, motor4=0, M1 =3, M2= 5, M3 =6, M4 =9;
+int motor1=0, motor2=0, motor3=0, motor4=0, M1=3, M2=5, M3=6, M4=9;
 int vehicle_yaw =0, vehicle_pitch =0, vehicle_roll=0, prevYawErr, prevPitchErr, prevRollErr, currYawErr, currPitchErr, currRollErr;
 int yaw_output, pitch_output, roll_output;
 long yawSum=0, pitchSum=0, rollSum=0;
@@ -88,7 +88,12 @@ struct tx_packet
     byte device_ID, target_ID, packet_type;
 }tp1;
 
-
+struct telem_packet
+{
+  int yaw, pitch, roll, armed;
+  byte vehicle_id;
+  long timestamp;
+}telem_p1;
 
 
 
@@ -214,6 +219,7 @@ void read_radio()
   }
   if ( radio.available() )
     {
+      Serial.println("RADIO READ");
       // Dump the payloads until we've gotten everything
       unsigned long got_time;
       bool done = false;
@@ -237,24 +243,33 @@ void read_radio()
         Serial.print(tp1.roll);Serial.print("  ");
         Serial.print(tp1.r_button); Serial.print("\t");
         */
-        // Delay just a little bit to let the other unit
-        // make the transition to receiver
-        delay(5);
       }
 
+      telem_p1.yaw = vehicle_yaw;
+      telem_p1.pitch = vehicle_pitch;
+      telem_p1.roll = vehicle_roll;
+      telem_p1.armed = armed;
+      telem_p1.vehicle_id = 1;
+
+      Serial.print(telem_p1.yaw); Serial.print("\t");
+      Serial.print(telem_p1.pitch); Serial.print("\t");
+      Serial.print(telem_p1.roll); Serial.println("\t");
       // First, stop listening so we can talk
       radio.stopListening();
+      delay(5);
+      radio.write( &telem_p1, sizeof(telem_p1));
+      //Serial.println("POSE WRITTEN");
       delay(5);
       // Now, resume listening so we catch the next packets.
       radio.startListening();
       if(rb==1 && lb==1)
       {
         armed = 1-armed;
-        delay(100);
-      }
-      while(radio.available())
-      {
-        radio.read( &tp1, sizeof(tp1) );
+        delay(300);
+        while(radio.available())
+        {
+          radio.read( &tp1, sizeof(tp1) );
+        }
       }
     }
 }
@@ -284,7 +299,7 @@ void read_pose()
         vehicle_yaw = ypr[0]* 180 / M_PI;
         vehicle_pitch = ypr[1]* 180 / M_PI;
         vehicle_roll = ypr[2]* 180 / M_PI;
-        //Serial.print(vehicle_yaw);Serial.print("\t");Serial.print(vehicle_pitch);Serial.print("\t");Serial.println(vehicle_roll);
+        Serial.print(vehicle_yaw);Serial.print("\t");Serial.print(vehicle_pitch);Serial.print("\t");Serial.println(vehicle_roll);
     }
         
 }
@@ -367,7 +382,7 @@ void write_to_motors()
     analogWrite(M2, motor2);
     analogWrite(M3, motor3);
     analogWrite(M4, motor4);
-    Serial.print(motor1);Serial.print("\t");Serial.print(motor2);Serial.print("\t"); Serial.print(motor3);Serial.print("\t");Serial.println(motor4);
+    //Serial.print(motor1);Serial.print("\t");Serial.print(motor2);Serial.print("\t"); Serial.print(motor3);Serial.print("\t");Serial.println(motor4);
 }
 
 
@@ -386,10 +401,10 @@ void loop() {
   else
   {
     read_radio();
-    Serial.println("RADIO READ");
+    
     read_pose();
     PID_compute_output();
-    Serial.println("PID COMPUTED");
+    //Serial.println("PID COMPUTED");
     write_to_motors();
     
 
