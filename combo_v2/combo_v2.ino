@@ -36,14 +36,14 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 // ===                        PID SETUP                         ===
 // ================================================================
 
-float yawKp = 1;
-float pitchKp = 1;
-float rollKp = 1;
+float yawKp = 0.5;
+float pitchKp = 0.5;
+float rollKp = 0.5;
 
 
-float yawKd = 2;
-float pitchKd = 2;
-float rollKd = 2;
+float yawKd = 3;
+float pitchKd = 3;
+float rollKd = 3;
 
 
 float yawKi = 0.1;
@@ -332,6 +332,43 @@ void PID_compute_output()
       yawSum += iYaw[i];
       pitchSum += iPitch[i];
       rollSum += iRoll[i];
+
+      n_thr = map(throttle, 0, 1023, 60, 255);
+      n_roll = map(roll, -512, 512, -30, 30);
+      n_pitch = map(pitch, -512, 512, -30, 30);
+      n_yaw = map(yaw, -512, 512, -30, 30);
+  
+      prevYawErr = currYawErr;
+      prevPitchErr = currPitchErr;
+      prevRollErr = currRollErr;
+      
+      
+      currYawErr = vehicle_yaw - n_yaw;
+      currPitchErr = vehicle_pitch - n_pitch;
+      currRollErr = vehicle_roll - n_roll;
+      yawSum =0;
+      pitchSum=0;
+      rollSum=0;
+      for (int i = 1; i<100; i++)
+      {
+        iYaw[i] = iYaw[i+1];
+        iPitch[i] = iPitch[i+1];
+        iRoll[i] = iRoll[i+1];
+        yawSum +=iYaw[i];
+        pitchSum +=iPitch[i];
+        rollSum +=iRoll[i];
+      }
+      iYaw[100] = currYawErr;
+      iPitch[100] = currPitchErr;
+      iRoll[100] = currRollErr;
+  
+      int intYaw = constrain(yawSum, -1000, 1000);
+      int intPitch = constrain(pitchSum, -800, 800);
+      int intRoll = constrain(rollSum, -800, 800);
+      //Serial.print(intYaw);Serial.print("\t");Serial.print(intPitch);Serial.print("\t");Serial.println(intRoll);
+      yaw_output = yawKp*currYawErr + yawKd*prevYawErr +yawKi*intYaw;
+      pitch_output = pitchKp*currPitchErr + pitchKd*prevPitchErr +pitchKi*intPitch;
+      roll_output = rollKp*currRollErr + rollKd*prevRollErr +rollKi*intRoll;
     }
     iYaw[100] = currYawErr;
     iPitch[100] = currPitchErr;
@@ -366,10 +403,17 @@ void write_to_motors()
 
   if (armed == 1)
   {
+
     motor1 = constrain(motor1, 10, 130);
     motor2 = constrain(motor2, 10, 130);
     motor3 = constrain(motor3, 10, 130);
     motor4 = constrain(motor4, 10, 130);
+
+//     motor1 = constrain(motor1, 50, 254);
+//     motor2 = constrain(motor2, 50, 254);
+//     motor3 = constrain(motor3, 50, 254);
+//     motor4 = constrain(motor4, 50, 254);
+
   }
   else if (armed == 0)
   {
