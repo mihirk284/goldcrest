@@ -36,14 +36,14 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 // ===                        PID SETUP                         ===
 // ================================================================
 
-float yawKp = 1;
-float pitchKp = 1;
-float rollKp = 1;
+float yawKp = 0.5;
+float pitchKp = 0.5;
+float rollKp = 0.5;
 
 
-float yawKd = 2;
-float pitchKd = 2;
-float rollKd = 2;
+float yawKd = 3;
+float pitchKd = 3;
+float rollKd = 3;
 
 
 float yawKi = 0.1;
@@ -309,9 +309,9 @@ void PID_compute_output()
     if (armed==1)
     {
       n_thr = map(throttle, 0, 1023, 60, 255);
-      n_roll = map(roll, -512, 512, -90, 90);
-      n_pitch = map(pitch, -512, 512, -90, 90);
-      n_yaw = map(yaw, -512, 512, -90, 90);
+      n_roll = map(roll, -512, 512, -30, 30);
+      n_pitch = map(pitch, -512, 512, -30, 30);
+      n_yaw = map(yaw, -512, 512, -30, 30);
   
       prevYawErr = currYawErr;
       prevPitchErr = currPitchErr;
@@ -366,10 +366,10 @@ void write_to_motors()
 
   if(armed == 1)
   {
-    motor1 = constrain(motor1, 80, 254);
-    motor2 = constrain(motor2, 80, 254);
-    motor3 = constrain(motor3, 80, 254);
-    motor4 = constrain(motor4, 80, 254);
+    motor1 = constrain(motor1, 50, 254);
+    motor2 = constrain(motor2, 50, 254);
+    motor3 = constrain(motor3, 50, 254);
+    motor4 = constrain(motor4, 50, 254);
   }
   else if(armed ==0)
   {
