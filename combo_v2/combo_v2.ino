@@ -84,16 +84,10 @@ int armed = 0;
 int yaw, pitch, roll, rb, lb, throttle;
 struct tx_packet
 {
-<<<<<<< HEAD
     int yaw, pitch, roll, throttle, r_button, l_button;
     byte device_ID, target_ID, packet_type;
     float rollKp, pitchKp, rollKd, pitchKd;
 }tp1;
-=======
-  int yaw, pitch, roll, throttle, r_button, l_button;
-  byte device_ID, target_ID, packet_type;
-} tp1;
->>>>>>> 9a13c4e2afba51c19aafc7da6336efeef68c20f9
 
 struct telem_packet
 {
@@ -142,7 +136,6 @@ void setup() {
   delay(100);
 
   // put your setup code here, to run once:
-<<<<<<< HEAD
     for(int i=0; i<101;i++)
     {
       iYaw[i] = 0;
@@ -211,93 +204,12 @@ void setup() {
         Serial.print(devStatus);
         Serial.println(F(")"));
     }
-=======
-  for (int i = 0; i < 101; i++)
-  {
-    iYaw[i] = 0;
-    iPitch[i] = 0;
-    iRoll[i] = 0;
-  }
-  // join I2C bus (I2Cdev library doesn't do this automatically)
-#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-  Wire.begin();
-  Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
-#elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
-  Fastwire::setup(400, true);
-#endif
-
-  // initialize serial communication
-  // (115200 chosen because it is required for Teapot Demo output, but it's
-  // really up to you depending on your project)
-  Serial.begin(115200);
-
-  radio.begin();
-  radio.setRetries(20, 3);
-  pinMode(3, INPUT_PULLUP);
-  pinMode(4, INPUT_PULLUP);
-  delay(100);
-  radio.startListening();
-  radio.openWritingPipe(pipes[0]);
-  radio.openReadingPipe(1, pipes[1]);
-
-
-  while (!Serial); // wait for Leonardo enumeration, others continue immediately
-  mpu.initialize();
-  pinMode(INTERRUPT_PIN, INPUT);
-  Serial.println(F("Testing device connections..."));
-  Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
-  devStatus = mpu.dmpInitialize();
-
-  // supply your own gyro offsets here, scaled for min sensitivity
-  mpu.setXGyroOffset(220);
-  mpu.setYGyroOffset(76);
-  mpu.setZGyroOffset(-85);
-  mpu.setZAccelOffset(1788); // 1688 factory default for my test chip
-
-  // make sure it worked (returns 0 if so)
-  if (devStatus == 0) {
-    // turn on the DMP, now that it's ready
-    Serial.println(F("Enabling DMP..."));
-    mpu.setDMPEnabled(true);
-
-    // enable Arduino interrupt detection
-    Serial.print(F("Enabling interrupt detection (Arduino external interrupt "));
-    Serial.print(digitalPinToInterrupt(INTERRUPT_PIN));
-    Serial.println(F(")..."));
-    attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
-    mpuIntStatus = mpu.getIntStatus();
-
-    // set our DMP Ready flag so the main loop() function knows it's okay to use it
-    Serial.println(F("DMP ready! Waiting for first interrupt..."));
-    dmpReady = true;
-
-    // get expected DMP packet size for later comparison
-    packetSize = mpu.dmpGetFIFOPacketSize();
-  } else {
-    // ERROR!
-    // 1 = initial memory load failed
-    // 2 = DMP configuration updates failed
-    // (if it's going to break, usually the code will be 1)
-    Serial.print(F("DMP Initialization failed (code "));
-    Serial.print(devStatus);
-    Serial.println(F(")"));
-  }
->>>>>>> 9a13c4e2afba51c19aafc7da6336efeef68c20f9
 }
 
 
 
 void read_radio()
 {
-<<<<<<< HEAD
-=======
-  // get current FIFO count
-  fifoCount = mpu.getFIFOCount();
-  if (fifoCount >= 512) {
-    mpu.resetFIFO();
-    delay(10);
-  }
->>>>>>> 9a13c4e2afba51c19aafc7da6336efeef68c20f9
   if ( radio.available() )
   {
     Serial.println("RADIO READ");
@@ -306,7 +218,6 @@ void read_radio()
     bool done = false;
     while (!done)
     {
-<<<<<<< HEAD
       //Serial.println("RADIO READ");
       // Dump the payloads until we've gotten everything
       unsigned long got_time;
@@ -327,18 +238,7 @@ void read_radio()
         rollKd = tp1.rollKd;
         pitchKd=tp1.pitchKd;
         /*READ RADIO COMMANDS
-=======
-      // Fetch the payload, and see if this was the last one.
-      done = radio.read( &tp1, sizeof(tp1) );
 
-      yaw = tp1.yaw;
-      pitch = tp1.pitch;
-      roll = tp1.roll;
-      throttle = tp1.throttle;
-      lb = tp1.l_button;
-      rb = tp1.r_button;
-      /*READ RADIO COMMANDS
->>>>>>> 9a13c4e2afba51c19aafc7da6336efeef68c20f9
         // Spew it
         Serial.print(tp1.throttle);Serial.print("  ");
         Serial.print(tp1.yaw);Serial.print("  ");
@@ -349,7 +249,6 @@ void read_radio()
       */
     }
 
-<<<<<<< HEAD
       telem_p1.yaw = vehicle_yaw;
       telem_p1.pitch = vehicle_pitch;
       telem_p1.roll = vehicle_roll;
@@ -367,30 +266,7 @@ void read_radio()
       // Now, resume listening so we catch the next packets.
       radio.startListening();
       if(rb==1 && lb==1)
-=======
-    telem_p1.yaw = vehicle_yaw;
-    telem_p1.pitch = vehicle_pitch;
-    telem_p1.roll = vehicle_roll;
-    telem_p1.armed = armed;
-    telem_p1.vehicle_id = 1;
 
-    Serial.print(telem_p1.yaw); Serial.print("\t");
-    Serial.print(telem_p1.pitch); Serial.print("\t");
-    Serial.print(telem_p1.roll); Serial.println("\t");
-    // First, stop listening so we can talk
-    radio.stopListening();
-    delay(5);
-    radio.write( &telem_p1, sizeof(telem_p1));
-    //Serial.println("POSE WRITTEN");
-    delay(5);
-    // Now, resume listening so we catch the next packets.
-    radio.startListening();
-    if (rb == 1 && lb == 1)
-    {
-      armed = 1 - armed;
-      delay(300);
-      while (radio.available())
->>>>>>> 9a13c4e2afba51c19aafc7da6336efeef68c20f9
       {
         radio.read( &tp1, sizeof(tp1) );
       }
@@ -403,7 +279,6 @@ void read_radio()
 void read_pose()
 {
   // get current FIFO count
-<<<<<<< HEAD
     fifoCount = mpu.getFIFOCount();
     
   
@@ -424,32 +299,6 @@ void read_pose()
         Serial.print(vehicle_yaw);Serial.print("\t");Serial.print(vehicle_pitch);Serial.print("\t");Serial.println(vehicle_roll);
         mpu.resetFIFO();
     }
-        
-=======
-  fifoCount = mpu.getFIFOCount();
-  if (fifoCount >= 512) {
-    mpu.resetFIFO();
-    delay(10);
-  }
-
-  // otherwise, check for DMP data ready interrupt (this should happen frequently)
-  if (fifoCount > 0) {
-    // wait for correct available data length, should be a VERY short wait
-    while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
-
-    // read a packet from FIFO
-    mpu.getFIFOBytes(fifoBuffer, packetSize);
-    // display Euler angles in degrees
-    mpu.dmpGetQuaternion(&q, fifoBuffer);
-    mpu.dmpGetGravity(&gravity, &q);
-    mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-    vehicle_yaw = ypr[0] * 180 / M_PI;
-    vehicle_pitch = ypr[1] * 180 / M_PI;
-    vehicle_roll = ypr[2] * 180 / M_PI;
-    Serial.print(vehicle_yaw); Serial.print("\t"); Serial.print(vehicle_pitch); Serial.print("\t"); Serial.println(vehicle_roll);
-  }
-
->>>>>>> 9a13c4e2afba51c19aafc7da6336efeef68c20f9
 }
 
 void PID_compute_output()
@@ -474,18 +323,7 @@ void PID_compute_output()
     rollSum = 0;
     for (int i = 1; i < 100; i++)
     {
-<<<<<<< HEAD
       n_thr = map(throttle, 0, 1023, 60, 200);
-=======
-      iYaw[i] = iYaw[i + 1];
-      iPitch[i] = iPitch[i + 1];
-      iRoll[i] = iRoll[i + 1];
-      yawSum += iYaw[i];
-      pitchSum += iPitch[i];
-      rollSum += iRoll[i];
-
-      n_thr = map(throttle, 0, 1023, 60, 255);
->>>>>>> 9a13c4e2afba51c19aafc7da6336efeef68c20f9
       n_roll = map(roll, -512, 512, -30, 30);
       n_pitch = map(pitch, -512, 512, -30, 30);
       n_yaw = map(yaw, -530, 510, -30, 30);
@@ -548,7 +386,6 @@ void PID_compute_output()
 
 void write_to_motors()
 {
-<<<<<<< HEAD
 // FOR CONTROL WITH YAW
   motor1 = n_thr - yaw_output - pitch_output + roll_output;
   motor2 = n_thr - yaw_output + pitch_output - roll_output;
@@ -558,29 +395,13 @@ void write_to_motors()
   
 //FOR CONTROL WITHOUT YAW
 /*
-=======
 
-  /* FOR CONTROL WITH YAW
-    motor1 = n_thr - yaw_output - pitch_output + roll_output;
-    motor2 = n_thr - yaw_output + pitch_output - roll_output;
-    motor3 = n_thr + yaw_output - pitch_output - roll_output;
-    motor4 = n_thr + yaw_output + pitch_output + roll_output;
-  */
-
-
-  //FOR CONTROL WITHOUT YAW
->>>>>>> 9a13c4e2afba51c19aafc7da6336efeef68c20f9
   motor1 = n_thr - pitch_output + roll_output;
   motor2 = n_thr + pitch_output - roll_output;
   motor3 = n_thr - pitch_output - roll_output;
   motor4 = n_thr + pitch_output + roll_output;
-<<<<<<< HEAD
 */
   if(armed == 1)
-=======
-
-  if (armed == 1)
->>>>>>> 9a13c4e2afba51c19aafc7da6336efeef68c20f9
   {
 
     motor1 = constrain(motor1, 10, 130);
@@ -631,17 +452,10 @@ void loop() {
     write_to_motors();
 
 
-<<<<<<< HEAD
     //Serial.println("-------------------------------");
     delay(5);
   //Serial.print(millis());Serial.print("\t"); Serial.println(counter);
   //counter++;
-=======
-    Serial.println("-------------------------------");
-    delay(20);
-    //Serial.print(millis());Serial.print("\t"); Serial.println(counter);
-    //counter++;
->>>>>>> 9a13c4e2afba51c19aafc7da6336efeef68c20f9
   }
 
 }
