@@ -36,14 +36,14 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 // ===                        PID SETUP                         ===
 // ================================================================
 
-float yawKp = 0.5;
-float pitchKp = 0.5;
-float rollKp = 0.5;
+float yawKp = 4;
+float pitchKp = 1;
+float rollKp = 1;
 
 
-float yawKd = 3;
-float pitchKd = 3;
-float rollKd = 3;
+float yawKd = 1;
+float pitchKd = 30;
+float rollKd = 30;
 
 
 float yawKi = 0.1;
@@ -86,6 +86,7 @@ struct tx_packet
 {
     int yaw, pitch, roll, throttle, r_button, l_button;
     byte device_ID, target_ID, packet_type;
+    float rollKp, pitchKp, rollKd, pitchKd;
 }tp1;
 
 struct telem_packet
@@ -155,9 +156,7 @@ void setup() {
     Serial.begin(115200);
 
     radio.begin();
-    radio.setRetries(20,3);
-    pinMode(3, INPUT_PULLUP);
-    pinMode(4, INPUT_PULLUP);
+    radio.setRetries(20,6);
     delay(100);
     radio.startListening();
     radio.openWritingPipe(pipes[0]);
@@ -211,15 +210,9 @@ void setup() {
 
 void read_radio()
 {
-  // get current FIFO count
-  fifoCount = mpu.getFIFOCount();
-  if (fifoCount>=512){
-    mpu.resetFIFO();
-    delay(10);
-  }
   if ( radio.available() )
     {
-      Serial.println("RADIO READ");
+      //Serial.println("RADIO READ");
       // Dump the payloads until we've gotten everything
       unsigned long got_time;
       bool done = false;
@@ -234,6 +227,10 @@ void read_radio()
         throttle = tp1.throttle;
         lb = tp1.l_button;
         rb = tp1.r_button;
+        rollKp = tp1.rollKp;
+        pitchKp=tp1.pitchKp;
+        rollKd = tp1.rollKd;
+        pitchKd=tp1.pitchKd;
         /*READ RADIO COMMANDS
         // Spew it
         Serial.print(tp1.throttle);Serial.print("  ");
@@ -259,7 +256,6 @@ void read_radio()
       delay(5);
       radio.write( &telem_p1, sizeof(telem_p1));
       //Serial.println("POSE WRITTEN");
-      delay(5);
       // Now, resume listening so we catch the next packets.
       radio.startListening();
       if(rb==1 && lb==1)
@@ -280,10 +276,7 @@ void read_pose()
 {
   // get current FIFO count
     fifoCount = mpu.getFIFOCount();
-    if (fifoCount>=512){
-      mpu.resetFIFO();
-      delay(10);
-    }
+    
   
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
     if (fifoCount > 0) {
@@ -300,6 +293,7 @@ void read_pose()
         vehicle_pitch = ypr[1]* 180 / M_PI;
         vehicle_roll = ypr[2]* 180 / M_PI;
         Serial.print(vehicle_yaw);Serial.print("\t");Serial.print(vehicle_pitch);Serial.print("\t");Serial.println(vehicle_roll);
+        mpu.resetFIFO();
     }
         
 }
@@ -308,10 +302,10 @@ void PID_compute_output()
 {
     if (armed==1)
     {
-      n_thr = map(throttle, 0, 1023, 60, 255);
+      n_thr = map(throttle, 0, 1023, 60, 200);
       n_roll = map(roll, -512, 512, -30, 30);
       n_pitch = map(pitch, -512, 512, -30, 30);
-      n_yaw = map(yaw, -512, 512, -30, 30);
+      n_yaw = map(yaw, -530, 510, -30, 30);
   
       prevYawErr = currYawErr;
       prevPitchErr = currPitchErr;
@@ -321,9 +315,12 @@ void PID_compute_output()
       currYawErr = vehicle_yaw - n_yaw;
       currPitchErr = vehicle_pitch - n_pitch;
       currRollErr = vehicle_roll - n_roll;
+      //Uncomment the following to use integral
+      /*
       yawSum =0;
       pitchSum=0;
       rollSum=0;
+      
       for (int i = 1; i<100; i++)
       {
         iYaw[i] = iYaw[i+1];
@@ -336,34 +333,40 @@ void PID_compute_output()
       iYaw[100] = currYawErr;
       iPitch[100] = currPitchErr;
       iRoll[100] = currRollErr;
-  
+      
       int intYaw = constrain(yawSum, -1000, 1000);
       int intPitch = constrain(pitchSum, -800, 800);
       int intRoll = constrain(rollSum, -800, 800);
       //Serial.print(intYaw);Serial.print("\t");Serial.print(intPitch);Serial.print("\t");Serial.println(intRoll);
-      yaw_output = yawKp*currYawErr + yawKd*prevYawErr +yawKi*intYaw;
-      pitch_output = pitchKp*currPitchErr + pitchKd*prevPitchErr +pitchKi*intPitch;
-      roll_output = rollKp*currRollErr + rollKd*prevRollErr +rollKi*intRoll;
+      
+      yaw_output = -yawKp*n_yaw +yawKi*intYaw;
+      pitch_output = pitchKp*currPitchErr + pitchKd*(currPitchErr-prevPitchErr)  +pitchKi*intPitch;
+      roll_output = rollKp*currRollErr + rollKd*(currRollErr-prevRollErr) +rollKi*intRoll;
+      */
+
+      //Use this without Ki
+      yaw_output = -yawKp*n_yaw;//+yawKi*intYaw;
+      pitch_output = pitchKp*currPitchErr + pitchKd*(currPitchErr-prevPitchErr);
+      roll_output = rollKp*currRollErr + rollKd*(currRollErr-prevRollErr);
     }
 }
 
 void write_to_motors()
 {
-
-  /* FOR CONTROL WITH YAW
+// FOR CONTROL WITH YAW
   motor1 = n_thr - yaw_output - pitch_output + roll_output;
   motor2 = n_thr - yaw_output + pitch_output - roll_output;
   motor3 = n_thr + yaw_output - pitch_output - roll_output;
   motor4 = n_thr + yaw_output + pitch_output + roll_output;
-  */
   
   
 //FOR CONTROL WITHOUT YAW
+/*
   motor1 = n_thr - pitch_output + roll_output;
   motor2 = n_thr + pitch_output - roll_output;
   motor3 = n_thr - pitch_output - roll_output;
   motor4 = n_thr + pitch_output + roll_output;
-
+*/
   if(armed == 1)
   {
     motor1 = constrain(motor1, 50, 254);
@@ -408,8 +411,8 @@ void loop() {
     write_to_motors();
     
 
-    Serial.println("-------------------------------");
-    delay(20);
+    //Serial.println("-------------------------------");
+    delay(5);
   //Serial.print(millis());Serial.print("\t"); Serial.println(counter);
   //counter++;
   }

@@ -7,10 +7,28 @@
 
 int left_joy_x=A3, left_joy_y=A6, right_joy_x=A0, right_joy_y=A1, right_joy_button=3, left_joy_button=4;
 
+
+//PID Gains
+
+float ROLL_KP = 1;
+float PITCH_KP = 1;
+
+float ROLL_KD = 10;
+float PITCH_KD = 10;
+
+
+
+//
+
+
+
+
+
 struct tx_packet
 {
     int yaw, pitch, roll, throttle, r_button, l_button;
     byte device_ID, target_ID, packet_type;
+    float rollKp, pitchKp, rollKd, pitchKd;
 }tp1;
 
 struct telem_packet
@@ -73,14 +91,18 @@ void loop()
     tp1.device_ID = TRANSMITTER_ID;
     tp1.target_ID = DRONE_ID;
     tp1.packet_type = 1;
-    /*
+    tp1.rollKp = ROLL_KP;
+    tp1.pitchKp =PITCH_KP;
+    tp1.rollKd = ROLL_KD;
+    tp1.pitchKd = PITCH_KD;
+    
     Serial.print(throttle);Serial.print("    ");
     Serial.print(502-yaw);Serial.print("    ");
     Serial.print(1-button_left);Serial.print("\t \t");
     Serial.print(pitch-506);Serial.print("    ");
     Serial.print(roll-510);Serial.print("    ");
     Serial.println(1-button_right);
-    */
+    
     delay(5);
     
     // First, stop listening so we can talk.
