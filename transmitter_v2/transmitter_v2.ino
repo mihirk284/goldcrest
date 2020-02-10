@@ -1,4 +1,4 @@
-#include <SPI.h>
+0#include <SPI.h>
 #include "nRF24L01.h"
 #include "RF24.h"
 
@@ -95,14 +95,14 @@ void loop()
     tp1.pitchKp =PITCH_KP;
     tp1.rollKd = ROLL_KD;
     tp1.pitchKd = PITCH_KD;
-    
+    /*
     Serial.print(throttle);Serial.print("    ");
     Serial.print(502-yaw);Serial.print("    ");
     Serial.print(1-button_left);Serial.print("\t \t");
     Serial.print(pitch-506);Serial.print("    ");
     Serial.print(roll-510);Serial.print("    ");
     Serial.println(1-button_right);
-    
+    */
     delay(5);
     
     // First, stop listening so we can talk.
@@ -116,7 +116,7 @@ void loop()
       Serial.println("ok...");
     else
       Serial.println("failed.\n\r");
-
+      
     // Now, continue listening
     radio.startListening();
     //delay(5);

@@ -213,63 +213,56 @@ void read_radio()
   if ( radio.available() )
   {
     Serial.println("RADIO READ");
-    // Dump the payloads until we've gotten everything
     unsigned long got_time;
     bool done = false;
     while (!done)
     {
-      //Serial.println("RADIO READ");
-      // Dump the payloads until we've gotten everything
-      unsigned long got_time;
-      bool done = false;
-      while (!done)
-      {
-        // Fetch the payload, and see if this was the last one.
-        done = radio.read( &tp1, sizeof(tp1) );
+      // Fetch the payload, and see if this was the last one.
+      done = radio.read( &tp1, sizeof(tp1) );
 
-        yaw = tp1.yaw;
-        pitch = tp1.pitch;
-        roll = tp1.roll;
-        throttle = tp1.throttle;
-        lb = tp1.l_button;
-        rb = tp1.r_button;
-        rollKp = tp1.rollKp;
-        pitchKp=tp1.pitchKp;
-        rollKd = tp1.rollKd;
-        pitchKd=tp1.pitchKd;
-        /*READ RADIO COMMANDS
+      yaw = tp1.yaw;
+      pitch = tp1.pitch;
+      roll = tp1.roll;
+      throttle = tp1.throttle;
+      lb = tp1.l_button;
+      rb = tp1.r_button;
+      rollKp = tp1.rollKp;
+      pitchKp=tp1.pitchKp;
+      rollKd = tp1.rollKd;
+      pitchKd=tp1.pitchKd;
+      /*READ RADIO COMMANDS
 
-        // Spew it
-        Serial.print(tp1.throttle);Serial.print("  ");
-        Serial.print(tp1.yaw);Serial.print("  ");
-        Serial.print(tp1.l_button);Serial.print("\t");
-        Serial.print(tp1.pitch);Serial.print("  ");
-        Serial.print(tp1.roll);Serial.print("  ");
-        Serial.print(tp1.r_button); Serial.print("\t");
-      */
-    }
+      // Spew it
+      Serial.print(tp1.throttle);Serial.print("  ");
+      Serial.print(tp1.yaw);Serial.print("  ");
+      Serial.print(tp1.l_button);Serial.print("\t");
+      Serial.print(tp1.pitch);Serial.print("  ");
+      Serial.print(tp1.roll);Serial.print("  ");
+      Serial.print(tp1.r_button); Serial.print("\t");
+    */
+  }
 
-      telem_p1.yaw = vehicle_yaw;
-      telem_p1.pitch = vehicle_pitch;
-      telem_p1.roll = vehicle_roll;
-      telem_p1.armed = armed;
-      telem_p1.vehicle_id = 1;
+    telem_p1.yaw = vehicle_yaw;
+    telem_p1.pitch = vehicle_pitch;
+    telem_p1.roll = vehicle_roll;
+    telem_p1.armed = armed;
+    telem_p1.vehicle_id = 1;
 
-      Serial.print(telem_p1.yaw); Serial.print("\t");
-      Serial.print(telem_p1.pitch); Serial.print("\t");
-      Serial.print(telem_p1.roll); Serial.println("\t");
-      // First, stop listening so we can talk
-      radio.stopListening();
-      delay(5);
-      radio.write( &telem_p1, sizeof(telem_p1));
-      //Serial.println("POSE WRITTEN");
-      // Now, resume listening so we catch the next packets.
-      radio.startListening();
-      if(rb==1 && lb==1)
-
-      {
-        radio.read( &tp1, sizeof(tp1) );
-      }
+    Serial.print(telem_p1.yaw); Serial.print("\t");
+    Serial.print(telem_p1.pitch); Serial.print("\t");
+    Serial.print(telem_p1.roll); Serial.println("\t");
+    // First, stop listening so we can talk
+    radio.stopListening();
+    delay(5);
+    radio.write( &telem_p1, sizeof(telem_p1));
+    //Serial.println("POSE WRITTEN");
+    // Now, resume listening so we catch the next packets.
+    radio.startListening();
+    if(rb==1 && lb==1)
+    armed=!armed;
+    while(radio.available())
+    {
+      radio.read( &tp1, sizeof(tp1) );
     }
   }
 }
@@ -280,9 +273,8 @@ void read_pose()
 {
   // get current FIFO count
     fifoCount = mpu.getFIFOCount();
-    
-  
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
+    
     if (fifoCount > 0) {
         // wait for correct available data length, should be a VERY short wait
         while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
@@ -436,8 +428,8 @@ void loop() {
   // put your main code here, to run repeatedly:
   if (millis() <= 6000)
   {
-    mpu.resetFIFO();
     delay(100);
+    mpu.resetFIFO();
     yawSum = 0;
     pitchSum = 0;
     rollSum = 0;
