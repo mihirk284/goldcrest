@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.3.2">
+<eagle version="9.2.2">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -2116,16 +2116,6 @@ Marquardt</description>
 <junction x="-104.14" y="-78.74"/>
 </segment>
 <segment>
-<pinref part="U2" gate="G$1" pin="VCC"/>
-<wire x1="73.66" y1="-76.2" x2="63.5" y2="-76.2" width="0.1524" layer="91"/>
-<label x="63.5" y="-76.2" size="1.778" layer="95"/>
-</segment>
-<segment>
-<pinref part="M4" gate="G$1" pin="VCC"/>
-<wire x1="-25.4" y1="-124.46" x2="-20.32" y2="-124.46" width="0.1524" layer="91"/>
-<label x="-25.4" y="-124.46" size="1.778" layer="95"/>
-</segment>
-<segment>
 <pinref part="U$2" gate="G$1" pin="VIN"/>
 <wire x1="43.18" y1="-71.12" x2="48.26" y2="-71.12" width="0.1524" layer="91"/>
 <label x="48.26" y="-71.12" size="1.778" layer="95"/>
@@ -2137,10 +2127,21 @@ Marquardt</description>
 <wire x1="-2.54" y1="-106.68" x2="-7.62" y2="-106.68" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$10" class="0">
+<net name="3.3V" class="0">
 <segment>
 <pinref part="U$2" gate="G$1" pin="3.3V"/>
 <wire x1="43.18" y1="-73.66" x2="48.26" y2="-73.66" width="0.1524" layer="91"/>
+<label x="48.26" y="-73.66" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="M4" gate="G$1" pin="VCC"/>
+<wire x1="-25.4" y1="-124.46" x2="-20.32" y2="-124.46" width="0.1524" layer="91"/>
+<label x="-25.4" y="-124.46" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="U2" gate="G$1" pin="VCC"/>
+<wire x1="73.66" y1="-76.2" x2="63.5" y2="-76.2" width="0.1524" layer="91"/>
+<label x="63.5" y="-76.2" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="D9" class="0">
