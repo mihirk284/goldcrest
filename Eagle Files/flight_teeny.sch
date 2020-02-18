@@ -2072,9 +2072,9 @@ Marquardt</description>
 <pinref part="R3" gate="G$1" pin="2"/>
 </segment>
 <segment>
-<pinref part="U$2" gate="G$1" pin="7/RX3"/>
-<wire x1="-2.54" y1="-88.9" x2="-7.62" y2="-88.9" width="0.1524" layer="91"/>
-<label x="-7.62" y="-88.9" size="1.778" layer="95"/>
+<pinref part="U$2" gate="G$1" pin="6/PWM"/>
+<wire x1="-2.54" y1="-86.36" x2="-7.62" y2="-86.36" width="0.1524" layer="91"/>
+<label x="-7.62" y="-86.36" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="P_IN" class="0">
@@ -2162,10 +2162,11 @@ Marquardt</description>
 <wire x1="-2.54" y1="-83.82" x2="-7.62" y2="-83.82" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$3" class="0">
+<net name="7" class="0">
 <segment>
-<pinref part="U$2" gate="G$1" pin="6/PWM"/>
-<wire x1="-2.54" y1="-86.36" x2="-7.62" y2="-86.36" width="0.1524" layer="91"/>
+<pinref part="U$2" gate="G$1" pin="7/RX3"/>
+<wire x1="-2.54" y1="-88.9" x2="-7.62" y2="-88.9" width="0.1524" layer="91"/>
+<label x="-7.62" y="-88.9" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>
