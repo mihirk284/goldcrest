@@ -1,4 +1,4 @@
-0#include <SPI.h>
+#include <SPI.h>
 #include "nRF24L01.h"
 #include "RF24.h"
 
@@ -65,12 +65,12 @@ role_e role = role_ping_out;
 void setup()
 {
     Serial.begin(115200);
-    radio.begin();
+    radio.begin();    
     radio.setRetries(10,10);
     pinMode(3, INPUT_PULLUP);
     pinMode(4, INPUT_PULLUP);
     delay(100);
-
+    radio.printDetails();
     radio.openWritingPipe(pipes[1]);
     radio.openReadingPipe(1,pipes[0]);
 }
@@ -95,14 +95,14 @@ void loop()
     tp1.pitchKp =PITCH_KP;
     tp1.rollKd = ROLL_KD;
     tp1.pitchKd = PITCH_KD;
-    /*
+    
     Serial.print(throttle);Serial.print("    ");
     Serial.print(502-yaw);Serial.print("    ");
     Serial.print(1-button_left);Serial.print("\t \t");
     Serial.print(pitch-506);Serial.print("    ");
     Serial.print(roll-510);Serial.print("    ");
     Serial.println(1-button_right);
-    */
+    
     delay(5);
     
     // First, stop listening so we can talk.
@@ -137,10 +137,10 @@ void loop()
       //Serial.println("GOT RESPONSE");
       success_ctr++;
       
-      Serial.print(telem_p1.yaw);Serial.print("\t");
-      Serial.print(telem_p1.pitch);Serial.print("\t");
-      Serial.print(telem_p1.roll);Serial.print("\t");
-      Serial.print(telem_p1.armed);Serial.print("\t");Serial.print(success_ctr+fail_ctr);Serial.print("\t");Serial.println(millis());
+//      Serial.print(telem_p1.yaw);Serial.print("\t");
+//      Serial.print(telem_p1.pitch);Serial.print("\t");
+//      Serial.print(telem_p1.roll);Serial.print("\t");
+//      Serial.print(telem_p1.armed);Serial.print("\t");Serial.print(success_ctr+fail_ctr);Serial.print("\t");Serial.println(millis());
       
     }
     radio.stopListening();
